@@ -48,7 +48,7 @@ button {
     color: white;
     font-size: 19px;
     cursor: pointer;
-    margin-top: 130px;
+    margin-top: 55px;
 }
 
 select {
@@ -71,8 +71,12 @@ select {
 
 #popup {
     height: 250px;
-    width: 250px;
+    width: 300px;
     background-color: white;
+}
+
+#popup input {
+    margin: 10px;
 }
 
 .elem {
@@ -97,4 +101,8 @@ span {
 
 span:hover {
     color: red;
+}
+
+select {
+    margin: 10px;
 }

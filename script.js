@@ -7,10 +7,12 @@ document.addEventListener("DOMContentLoaded", function () {
   const inputs = document.getElementById("inputs");
   const inputSide = document.getElementById("inputSide");
   const l = document.getElementById("l");
+  const download = document.getElementById("download");
+  const js = document.getElementById("json");
 
   let draggedElem = null;
 
-  popup.addEventListener("click", (e) => {
+  popup.addEventListener("click", () => {
     popup.style.visibility = "hidden";
   });
 
@@ -22,7 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
     popup.style.visibility = "visible";
   });
 
-  function dragStartHandler(e, elem) {
+  function dragStartHandler(_, elem) {
     draggedElem = elem;
   }
 
@@ -34,6 +36,52 @@ document.addEventListener("DOMContentLoaded", function () {
     draggedElem.setAttribute("order", order);
     draw([...inputs.children]);
   }
+
+  download.addEventListener("click", () => {
+    const elements = [];
+    [...inputSide.children].forEach((elem) => {
+      const elementLabel = elem.querySelector("label").textContent;
+      const elementType = elem.querySelector("input").type;
+      const elementOrder = elem.style.order;
+      elements.push({
+        type: elementType,
+        label: elementLabel,
+        order: elementOrder,
+      });
+    });
+    const jsonData = JSON.stringify(elements, null, 2);
+    const blob = new Blob([jsonData], { type: "application/json" });
+    const link = document.createElement("a");
+    link.download = "schema.json";
+    link.href = window.URL.createObjectURL(blob);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
+
+  function creatingByJson(event) {
+    const files = event.target.files;
+    for (const file of files) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const fileContent = e.target.result;
+        const data = JSON.parse(fileContent);
+        redrawFromJson(data);
+      };
+
+      reader.readAsText(file);
+      popup.style.visibility = "hidden";
+    }
+  }
+
+  function redrawFromJson(data) {
+    data.forEach((element) => {
+      createInput(element.type, element.label);
+      createElem(element.type);
+    });
+  }
+
+  js.addEventListener("change", creatingByJson);
 
   function dragOverHandler(e) {
     e.preventDefault();
@@ -97,20 +145,23 @@ document.addEventListener("DOMContentLoaded", function () {
     inputs.appendChild(div);
   }
 
-  function createInput(type) {
+  function createInput(type, l) {
     const input = document.createElement("input");
     const div = document.createElement("div");
     const label = document.createElement("label");
-    label.textContent = l.value;
+    label.textContent = l;
+    input.id = type;
+    label.setAttribute("for", type);
     div.appendChild(label);
     input.type = type;
+    div.style.order = inputSide.childElementCount;
     div.appendChild(input);
     inputSide.appendChild(div);
   }
 
   submit.addEventListener("click", () => {
     popup.style.visibility = "hidden";
+    createInput(select.value, l.value);
     createElem(select.value);
-    createInput(select.value);
   });
 });
